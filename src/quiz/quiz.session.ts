@@ -133,9 +133,9 @@ export class QuizSession {
       if(this._state == QuizState.Ended) return;
     }
 
-    // if quiz has ended, and user was in quiz before it has ended => send leaderboard
-    if(this._state == QuizState.Ended && oldParticipant) {
-      socket.emit('reward', { reward: oldParticipant.reward });
+    // if quiz has ended, send leaderboard
+    if(this._state == QuizState.Ended) {
+      if(oldParticipant) socket.emit('reward', { reward: oldParticipant.reward });
       socket.emit('leaderboard', this.leaderboard.map((x) => ({
         name: x.socket.data.user.login,
         score: x.score,
