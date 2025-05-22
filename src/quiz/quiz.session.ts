@@ -124,14 +124,22 @@ export class QuizSession {
   }
 
   public join(socket: Socket) {
-    if (this._state == QuizState.Ended) {
-      return;
-    }
-
     const oldParticipant = this.participants.get(socket.data.user.login);
     if (oldParticipant) {
       oldParticipant.socket.disconnect(true);
       oldParticipant.socket = socket;
+    } else {
+      // if user was not in quiz and quiz has ended, do not join
+      if(this._state == QuizState.Ended) return;
+    }
+
+    // if quiz has ended, and user was in quiz before it has ended => send leaderboard
+    if(this._state == QuizState.Ended && oldParticipant) {
+      socket.emit('reward', { reward: oldParticipant.reward });
+      socket.emit('leaderboard', this.leaderboard.map((x) => ({
+        name: x.socket.data.user.login,
+        score: x.score,
+      })));
     }
 
     socket.data.quizId = this.id;

@@ -6,6 +6,7 @@ This is a simple quiz backend built with NestJS and Typescript.
 
 - User authentication & session restore
 - Quizzes & score for correct answers
+- Faster answer = bigger score
 - Leaderboard & Rewards after quiz
 - Quiz creation and management
 - SQLite/MySQL (currently only for accounts)

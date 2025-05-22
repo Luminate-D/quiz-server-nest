@@ -42,7 +42,7 @@ export class QuizManagerService extends EventEmitter<QuizManagerEvents> {
 
   public list() {
     return Array.from(this.quizzes.values())
-      .filter((x) => x.state != QuizState.Ended)
+      // .filter((x) => x.state != QuizState.Ended)
       .map((x) => x.toDTO());
   }
 }
