@@ -5,6 +5,7 @@ import { Participant } from './models/participant.model';
 import { DateTime } from 'luxon';
 import { LoggerService } from '@nestjs/common';
 import { AppLoggerService } from '../logger/logger.service';
+import { map } from "../lib/number.util";
 
 export enum QuizState {
   Appointed,
@@ -31,6 +32,7 @@ export class QuizSession {
     this._state = QuizState.Appointed;
   }
 
+  private lastQuestionAt: DateTime;
   private _state: QuizState;
 
   public get state() {
@@ -56,6 +58,7 @@ export class QuizSession {
 
     this.setState(QuizState.Running);
     for (const question of this.quiz.questions) {
+      this.lastQuestionAt = DateTime.now();
       this.currentValidAnswerIndex = question.correctAnswerIndex;
 
       for (const participant of this.participants.values()) {
@@ -93,7 +96,6 @@ export class QuizSession {
   }
 
   public answer(socket: Socket, index: number) {
-    console.log(`Answer #${index}, correct: ${this.currentValidAnswerIndex}`);
     if (
       this._state != QuizState.Running ||
       index != this.currentValidAnswerIndex
@@ -106,13 +108,19 @@ export class QuizSession {
       return;
     }
 
-    const diff = participant.lastAnswerAt.diffNow('milliseconds');
-    console.log('Diff:', diff.milliseconds, diff);
+    const minScore = 100;
+    const maxScore = 200;
 
-    // TODO: map diff to score (50-150)
-    participant.score += 100;
+    const diff = this.lastQuestionAt.diffNow('milliseconds');
+
+    participant.score += Math.round(
+      map(
+        this.quiz.timePerQuestionInSeconds * 1000 - Math.abs(diff.milliseconds),
+        0, this.quiz.timePerQuestionInSeconds * 1000,
+        minScore, maxScore)
+    );
+
     participant.answered = true;
-    participant.lastAnswerAt = DateTime.now();
   }
 
   public join(socket: Socket) {

@@ -7,12 +7,10 @@ export class Participant {
   reward: string;
 
   answered: boolean;
-  lastAnswerAt: DateTime;
 
   constructor(socket: Socket) {
     this.socket = socket;
     this.score = 0;
     this.answered = false;
-    this.lastAnswerAt = DateTime.fromMillis(0);
   }
 }
